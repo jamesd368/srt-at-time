@@ -28,6 +28,15 @@ The time argument accepts either an SRT-style timestamp (`HH:MM:SS,mmm`) or
 plain seconds, decimals allowed. If two cues overlap at the given moment,
 both are printed.
 
+`.vtt` (WebVTT) files work the same way; the format is picked by file
+extension:
+
+```
+$ srtat movie.vtt 83.5
+#42
+Come with me if you want to live.
+```
+
 As a library:
 
 ```python
@@ -40,18 +49,25 @@ for cue in at(cues, ms=83_500):
     print(cue.text)
 ```
 
+For WebVTT, use `parse_vtt` instead of `parse`.
+
 ## What it handles
 
-Real .srt files are messier than the spec suggests. Right now `srtat` copes
-with:
+Real subtitle files are messier than the spec suggests. Right now `srtat`
+copes with:
 
 - a leading BOM
 - CRLF or LF line endings
-- a period instead of a comma before milliseconds
-- missing or non-numeric index lines
+- a period instead of a comma before milliseconds (SRT)
+- missing or non-numeric index/identifier lines
 - multi-line cue text
 - overlapping cues
 - zero-duration cues
+
+For WebVTT specifically, it also handles the required `WEBVTT` header
+(including trailing metadata), `NOTE` and `STYLE` blocks, cue settings
+trailing the timing line (`align:middle`, `line:90%`, and so on), and
+timestamps that omit the hours field.
 
 Cues with an end time equal to their start time never match a query; a cue
 matches from its start time up to (but not including) its end time, so
@@ -59,8 +75,8 @@ back-to-back cues don't both claim the boundary millisecond.
 
 ## Status
 
-Early. Only the `.srt` format is supported so far. No dependencies beyond
-the Python standard library.
+Early. `.srt` and `.vtt` are both supported. No dependencies beyond the
+Python standard library.
 
 ## Running the tests
 
