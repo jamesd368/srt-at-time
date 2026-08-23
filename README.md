@@ -28,6 +28,21 @@ The time argument accepts either an SRT-style timestamp (`HH:MM:SS,mmm`) or
 plain seconds, decimals allowed. If two cues overlap at the given moment,
 both are printed.
 
+To list every cue in a stretch of the file instead of a single instant, use
+`--range`:
+
+```
+$ srtat movie.srt --range 00:01:20,000 00:01:30,000
+#42 00:01:23,500 --> 00:01:26,000
+Come with me if you want to live.
+
+#43 00:01:27,000 --> 00:01:29,800
+Sorry, kid.
+```
+
+`--range` takes the same time formats as the single-instant query and lists
+any cue that overlaps the window at all, even partially.
+
 `.vtt` (WebVTT) files work the same way; the format is picked by file
 extension:
 

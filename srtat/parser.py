@@ -49,6 +49,14 @@ def parse_timestamp(raw: str) -> int:
     )
 
 
+def format_timestamp(ms: int) -> str:
+    """Format a millisecond offset as an SRT-style timestamp (HH:MM:SS,mmm)."""
+    hours, rem = divmod(ms, 3_600_000)
+    minutes, rem = divmod(rem, 60_000)
+    seconds, millis = divmod(rem, 1_000)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d},{millis:03d}"
+
+
 def parse(text: str) -> list[Cue]:
     """Parse the contents of a .srt file into a list of Cue objects, in order."""
     # A leading BOM and CRLF line endings both show up regularly in the wild;
@@ -97,3 +105,17 @@ def at(cues: list[Cue], ms: int) -> list[Cue]:
     files) are common enough that this returns a list rather than assuming.
     """
     return [c for c in cues if c.contains(ms)]
+
+
+def in_range(cues: list[Cue], start_ms: int, end_ms: int) -> list[Cue]:
+    """Return every cue that overlaps the half-open window [start_ms, end_ms).
+
+    A cue overlaps the window if any millisecond of the cue also falls in the
+    window. Zero-duration cues never match, same as with `at`, since they
+    have no millisecond that's actually on screen.
+    """
+    return [
+        c
+        for c in cues
+        if c.start_ms < c.end_ms and c.start_ms < end_ms and start_ms < c.end_ms
+    ]

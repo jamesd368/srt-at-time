@@ -1,6 +1,13 @@
 import unittest
 
-from srtat.parser import SubtitleParseError, at, parse, parse_timestamp
+from srtat.parser import (
+    SubtitleParseError,
+    at,
+    format_timestamp,
+    in_range,
+    parse,
+    parse_timestamp,
+)
 
 SIMPLE = """1
 00:00:01,000 --> 00:00:04,000
@@ -110,6 +117,42 @@ class LookupTests(unittest.TestCase):
         cues = parse(text)
         matches = at(cues, 4000)
         self.assertEqual(len(matches), 2)
+
+
+class InRangeTests(unittest.TestCase):
+
+    def setUp(self):
+        self.cues = parse(SIMPLE)
+
+    RANGE_CASES = [
+        ("range before everything", 0, 500, 0),
+        ("range wholly inside first cue", 2000, 3000, 1),
+        ("range spans both cues and the gap", 0, 9000, 2),
+        ("range touches only the gap", 4200, 4800, 0),
+        ("range partially overlaps first cue's tail", 500, 1500, 1),
+        ("range starts exactly where second cue ends", 8500, 9000, 0),
+    ]
+
+    def test_range_cases(self):
+        for name, start_ms, end_ms, expected_count in self.RANGE_CASES:
+            with self.subTest(name):
+                self.assertEqual(len(in_range(self.cues, start_ms, end_ms)), expected_count)
+
+    def test_zero_duration_cue_never_matches_a_range(self):
+        text = "1\n00:00:01,000 --> 00:00:01,000\nBlink.\n"
+        cues = parse(text)
+        self.assertEqual(in_range(cues, 0, 5000), [])
+
+
+class FormatTimestampTests(unittest.TestCase):
+
+    def test_round_trips_with_parse_timestamp(self):
+        for raw in ("00:00:01,500", "01:02:03,004", "00:00:00,000"):
+            with self.subTest(raw):
+                self.assertEqual(format_timestamp(parse_timestamp(raw)), raw)
+
+    def test_pads_fields(self):
+        self.assertEqual(format_timestamp(61_005), "00:01:01,005")
 
 
 if __name__ == "__main__":
