@@ -43,6 +43,17 @@ Sorry, kid.
 `--range` takes the same time formats as the single-instant query and lists
 any cue that overlaps the window at all, even partially.
 
+Pass `--format json` to get machine-readable output instead, for scripting:
+
+```
+$ srtat movie.srt 83.5 --format json
+[{"index": 42, "start_ms": 83500, "end_ms": 86000, "start": "00:01:23,500", "end": "00:01:26,000", "text": "Come with me if you want to live."}]
+```
+
+It's always a JSON array, even for a single-instant query: empty (`[]`) when
+nothing matches, with more than one entry when cues overlap. `--range` uses
+the same array shape.
+
 `.vtt` (WebVTT) files work the same way; the format is picked by file
 extension:
 

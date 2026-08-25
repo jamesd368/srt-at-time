@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 
 from .parser import (
@@ -23,6 +24,17 @@ def _parse_query_time(raw: str) -> int:
         return parse_timestamp(raw)
     # Bare number: treat as seconds, decimals allowed (e.g. "83.4").
     return int(round(float(raw) * 1000))
+
+
+def _cue_to_dict(cue: Cue) -> dict:
+    return {
+        "index": cue.index,
+        "start_ms": cue.start_ms,
+        "end_ms": cue.end_ms,
+        "start": format_timestamp(cue.start_ms),
+        "end": format_timestamp(cue.end_ms),
+        "text": cue.text,
+    }
 
 
 def _load_cues(path: str) -> list[Cue]:
@@ -50,6 +62,12 @@ def main(argv: list[str] | None = None) -> int:
         metavar=("START", "END"),
         help="list every cue overlapping the window between START and END "
         "instead of querying a single instant",
+    )
+    parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="output format: human-readable text (default) or json",
     )
     args = parser.parse_args(argv)
 
@@ -81,6 +99,11 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
         matches = in_range(cues, start_ms, end_ms)
+
+        if args.format == "json":
+            print(json.dumps([_cue_to_dict(c) for c in matches], ensure_ascii=False))
+            return 0
+
         if not matches:
             print("(no subtitles in this range)")
             return 0
@@ -98,6 +121,11 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     matches = at(cues, query_ms)
+
+    if args.format == "json":
+        print(json.dumps([_cue_to_dict(c) for c in matches], ensure_ascii=False))
+        return 0
+
     if not matches:
         print("(no subtitle at this time)")
         return 0
