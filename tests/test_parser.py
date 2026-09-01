@@ -2,6 +2,7 @@ import unittest
 
 from srtat.parser import (
     SubtitleParseError,
+    SubtitleParseWarning,
     at,
     format_timestamp,
     in_range,
@@ -84,10 +85,21 @@ class ParseAwkwardFilesTests(unittest.TestCase):
         self.assertEqual(len(cues), 1)
         self.assertEqual(cues[0].start_ms, cues[0].end_ms)
 
-    def test_malformed_timing_line_raises(self):
+    def test_malformed_timing_line_is_skipped_with_a_warning(self):
         text = "1\nnot a timing line\nsomething\n"
-        with self.assertRaises(SubtitleParseError):
-            parse(text)
+        with self.assertWarns(SubtitleParseWarning):
+            cues = parse(text)
+        self.assertEqual(cues, [])
+
+    def test_bad_timestamp_is_skipped_without_losing_other_cues(self):
+        text = SIMPLE.replace(
+            "2\n00:00:05,000 --> 00:00:08,500\nGeneral Kenobi.\n",
+            "2\nnot --> a timestamp\nGeneral Kenobi.\n",
+        )
+        with self.assertWarns(SubtitleParseWarning):
+            cues = parse(text)
+        self.assertEqual(len(cues), 1)
+        self.assertEqual(cues[0].text, "Hello there.")
 
 
 class LookupTests(unittest.TestCase):

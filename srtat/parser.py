@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import warnings
 from dataclasses import dataclass
 
 # Hours are technically two digits in the SubRip spec, but files produced by
@@ -14,6 +15,12 @@ _ARROW_RE = re.compile(r"-->")
 
 class SubtitleParseError(ValueError):
     """Raised when a .srt file (or a piece of one) can't be understood."""
+
+
+class SubtitleParseWarning(UserWarning):
+    """Emitted when a single cue is malformed and gets skipped rather than
+    failing the whole file. One bad cue (a stray edit, a broken export)
+    shouldn't cost you every other cue in the file."""
 
 
 @dataclass(frozen=True)
@@ -58,7 +65,13 @@ def format_timestamp(ms: int) -> str:
 
 
 def parse(text: str) -> list[Cue]:
-    """Parse the contents of a .srt file into a list of Cue objects, in order."""
+    """Parse the contents of a .srt file into a list of Cue objects, in order.
+
+    A cue block with an unparseable timing line is skipped rather than
+    aborting the whole file; a SubtitleParseWarning is raised for each one
+    skipped, so callers who care can catch or log it with the `warnings`
+    module.
+    """
     # A leading BOM and CRLF line endings both show up regularly in the wild;
     # normalize before splitting into blocks.
     text = text.lstrip("﻿").replace("\r\n", "\n").replace("\r", "\n")
@@ -87,11 +100,19 @@ def parse(text: str) -> list[Cue]:
             body_lines = lines[2:]
 
         if not _ARROW_RE.search(timing_line):
-            raise SubtitleParseError(f"cue {index}: no --> in {timing_line!r}")
+            warnings.warn(
+                f"skipping cue {index}: no --> in {timing_line!r}",
+                SubtitleParseWarning,
+            )
+            continue
 
         start_raw, end_raw = timing_line.split("-->", 1)
-        start_ms = parse_timestamp(start_raw)
-        end_ms = parse_timestamp(end_raw)
+        try:
+            start_ms = parse_timestamp(start_raw)
+            end_ms = parse_timestamp(end_raw)
+        except SubtitleParseError as exc:
+            warnings.warn(f"skipping cue {index}: {exc}", SubtitleParseWarning)
+            continue
         cues.append(
             Cue(index=index, start_ms=start_ms, end_ms=end_ms, text="\n".join(body_lines))
         )

@@ -99,6 +99,11 @@ Cues with an end time equal to their start time never match a query; a cue
 matches from its start time up to (but not including) its end time, so
 back-to-back cues don't both claim the boundary millisecond.
 
+A cue block with a garbled timing line or timestamp is skipped rather than
+failing the whole file; each one raises a `SubtitleParseWarning` (via the
+standard `warnings` module) so you can see what got dropped without losing
+the rest of the file over one bad cue.
+
 ## Status
 
 Early. `.srt` and `.vtt` are both supported. No dependencies beyond the

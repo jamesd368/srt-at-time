@@ -1,6 +1,7 @@
 from .parser import (
     Cue,
     SubtitleParseError,
+    SubtitleParseWarning,
     at,
     format_timestamp,
     in_range,
@@ -12,6 +13,7 @@ from .vtt import parse_vtt, parse_vtt_timestamp
 __all__ = [
     "Cue",
     "SubtitleParseError",
+    "SubtitleParseWarning",
     "at",
     "format_timestamp",
     "in_range",

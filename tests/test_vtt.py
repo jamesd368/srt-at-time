@@ -1,6 +1,6 @@
 import unittest
 
-from srtat.parser import SubtitleParseError, at
+from srtat.parser import SubtitleParseError, SubtitleParseWarning, at
 from srtat.vtt import parse_vtt, parse_vtt_timestamp
 
 SIMPLE = """WEBVTT
@@ -105,6 +105,22 @@ class ParseVttFilesTests(unittest.TestCase):
         text = "WEBVTT\n\n1\n00:00:01.000 --> 00:00:04.000\nLine one\nLine two\n"
         cues = parse_vtt(text)
         self.assertEqual(cues[0].text, "Line one\nLine two")
+
+    def test_bad_timestamp_is_skipped_without_losing_other_cues(self):
+        text = SIMPLE.replace(
+            "2\n00:00:05.000 --> 00:00:08.500\nGeneral Kenobi.\n",
+            "2\nnot --> a timestamp\nGeneral Kenobi.\n",
+        )
+        with self.assertWarns(SubtitleParseWarning):
+            cues = parse_vtt(text)
+        self.assertEqual(len(cues), 1)
+        self.assertEqual(cues[0].text, "Hello there.")
+
+    def test_unrecognizable_block_is_skipped_with_a_warning(self):
+        text = "WEBVTT\n\nintro-cue\nnot a timing line\nsomething\n"
+        with self.assertWarns(SubtitleParseWarning):
+            cues = parse_vtt(text)
+        self.assertEqual(cues, [])
 
 
 class VttLookupTests(unittest.TestCase):
