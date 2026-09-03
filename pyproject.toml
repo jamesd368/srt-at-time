@@ -2,8 +2,30 @@
 name = "srtat"
 version = "0.1.0"
 description = "Look up which subtitle cue is on screen at a given time."
+readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
+authors = [{ name = "jamesd368" }]
+keywords = ["srt", "vtt", "webvtt", "subtitles", "subrip", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Text Processing",
+]
+
+[project.urls]
+Homepage = "https://github.com/jamesd368/srt-at-time"
+Issues = "https://github.com/jamesd368/srt-at-time/issues"
 
 [project.scripts]
 srtat = "srtat.cli:main"
@@ -11,3 +33,6 @@ srtat = "srtat.cli:main"
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["srtat*"]
