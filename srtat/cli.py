@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 
+from . import __version__
 from .parser import (
     Cue,
     SubtitleParseError,
@@ -49,6 +50,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="srtat",
         description="Show which subtitle cue is on screen at a given time.",
+    )
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
     )
     parser.add_argument("srt_file", help="path to a .srt or .vtt file")
     parser.add_argument(

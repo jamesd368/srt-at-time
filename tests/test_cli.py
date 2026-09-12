@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from srtat import __version__
 from srtat.cli import main
 
 SIMPLE = """1
@@ -163,6 +164,17 @@ class CliErrorHandlingTests(unittest.TestCase):
         status, out, err = self._run(self.srt_path, "--range", "9", "0")
         self.assertEqual(status, 1)
         self.assertIn("--range end must be after start", err)
+
+
+class CliVersionTests(unittest.TestCase):
+
+    def test_version_flag_prints_version_and_exits_zero(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            with self.assertRaises(SystemExit) as cm:
+                main(["--version"])
+        self.assertEqual(cm.exception.code, 0)
+        self.assertIn(__version__, out.getvalue())
 
 
 class CliVttDispatchTests(unittest.TestCase):

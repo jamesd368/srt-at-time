@@ -10,6 +10,8 @@ from .parser import (
 )
 from .vtt import parse_vtt, parse_vtt_timestamp
 
+__version__ = "0.1.0"
+
 __all__ = [
     "Cue",
     "SubtitleParseError",
@@ -21,4 +23,5 @@ __all__ = [
     "parse_timestamp",
     "parse_vtt",
     "parse_vtt_timestamp",
+    "__version__",
 ]
