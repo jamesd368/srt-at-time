@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Multimedia :: Video",
     "Topic :: Text Processing",
+    "Typing :: Typed",
 ]
 
 [project.urls]
@@ -36,3 +37,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["srtat*"]
+
+[tool.setuptools.package-data]
+srtat = ["py.typed"]
