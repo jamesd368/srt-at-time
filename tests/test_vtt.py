@@ -101,6 +101,16 @@ class ParseVttFilesTests(unittest.TestCase):
         cues = parse_vtt(text)
         self.assertEqual(len(cues), 1)
 
+    def test_region_block_is_skipped(self):
+        text = (
+            "WEBVTT\n\n"
+            "REGION\nid:fred\nwidth:40%\nlines:3\n\n"
+            "1\n00:00:01.000 --> 00:00:04.000\nActual cue.\n"
+        )
+        cues = parse_vtt(text)
+        self.assertEqual(len(cues), 1)
+        self.assertEqual(cues[0].text, "Actual cue.")
+
     def test_multiline_cue_text(self):
         text = "WEBVTT\n\n1\n00:00:01.000 --> 00:00:04.000\nLine one\nLine two\n"
         cues = parse_vtt(text)

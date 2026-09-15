@@ -91,9 +91,9 @@ copes with:
 - zero-duration cues
 
 For WebVTT specifically, it also handles the required `WEBVTT` header
-(including trailing metadata), `NOTE` and `STYLE` blocks, cue settings
-trailing the timing line (`align:middle`, `line:90%`, and so on), and
-timestamps that omit the hours field.
+(including trailing metadata), `NOTE`, `STYLE`, and `REGION` blocks, cue
+settings trailing the timing line (`align:middle`, `line:90%`, and so on),
+and timestamps that omit the hours field.
 
 Cues with an end time equal to their start time never match a query; a cue
 matches from its start time up to (but not including) its end time, so
