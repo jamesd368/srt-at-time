@@ -54,6 +54,9 @@ It's always a JSON array, even for a single-instant query: empty (`[]`) when
 nothing matches, with more than one entry when cues overlap. `--range` uses
 the same array shape.
 
+From a source checkout, without installing the console script, run it as a
+module instead: `python -m srtat movie.srt 83.5`.
+
 `.vtt` (WebVTT) files work the same way; the format is picked by file
 extension:
 

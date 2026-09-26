@@ -1,6 +1,8 @@
 import contextlib
 import io
 import json
+import runpy
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -175,6 +177,28 @@ class CliVersionTests(unittest.TestCase):
                 main(["--version"])
         self.assertEqual(cm.exception.code, 0)
         self.assertIn(__version__, out.getvalue())
+
+
+class MainModuleTests(unittest.TestCase):
+
+    def setUp(self):
+        tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmpdir.cleanup)
+        self.srt_path = str(Path(tmpdir.name) / "movie.srt")
+        Path(self.srt_path).write_text(SIMPLE, encoding="utf-8")
+
+    def test_python_dash_m_dispatches_to_cli_main(self):
+        old_argv = sys.argv
+        sys.argv = ["srtat", self.srt_path, "2.0"]
+        out = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(out):
+                with self.assertRaises(SystemExit) as cm:
+                    runpy.run_module("srtat", run_name="__main__")
+        finally:
+            sys.argv = old_argv
+        self.assertEqual(cm.exception.code, 0)
+        self.assertEqual(out.getvalue(), "#1\nHello there.\n")
 
 
 class CliVttDispatchTests(unittest.TestCase):
